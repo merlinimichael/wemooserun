@@ -79,9 +79,8 @@ function createFilterControls(map, attributes){
         onAdd: function(map){
             var container = L.DomUtil.create('div', 'filter-control-container');
             $(container).append('<nav class="menu-ui"><a href="#" class="active all" \
-            data-filter="all">Show all</a><a href="#" data-filter="greaterthan5" class="gt5">>5 \
-            Clear Days</a><a href="#" data-filer="greaterthan10" class="gt10">>10 Clear Days</a><a \
-            href="#" data-filter="greaterthan20" class="gt20">>20 Clear Days</a></nav>');
+            data-filter="all">Show all</a><a href="#" data-filter="marathon" class="marathon">Marathon - 26.2 miles</a><a href="#" data-filer="halfmarathon" class="halfmarathon">Half Marathon - 13.1 miles</a><a \
+            href="#" data-filter="marathonrelay" class="marathonrelay">Marathon Relay</a><a href="#" data-filter="10k" class="10k">10k - 6.2 miles</a><a href="#" data-filter="5k" class="5k">5k - 3.1 miles</a></nav>');
             //enable and disables map functions while using controls
             container.addEventListener('mousedown', function() {
                 map.dragging.disable();
@@ -198,11 +197,11 @@ function updateFilter(data, map, attributes, filterAmount){
 
 //takes filter button text and returns filter amount
 function getDayFilter(buttonText){
-    if (buttonText === ">5 Clear Days"){
+    if (buttonText === "Marathon - 26.2 miles"){
         return 5;
-    } else if (buttonText === ">10 Clear Days"){
+    } else if (buttonText === "Half Marathon - 13.1 miles"){
         return 10;
-    } else if (buttonText === ">20 Clear Days"){
+    } else if (buttonText === "Marathon Relay"){
         return 20;
     } else {
         return 0;
@@ -355,9 +354,10 @@ function processData(data){
 // Import GeoJSON data
 function getData(map){
     //load the data
-    $.ajax("data/map.geojson", {
+    $.ajax("data/marathonruns.geojson", {
         dataType: "json",
         success: function(response){
+            L.geoJson(response).addTo(map);
             var attributes = processData(response);
             mapLayer = createPropSymbols(response, map, attributes, 0, 0);
             createSequenceControls(map, attributes);
