@@ -357,7 +357,50 @@ function getData(map){
     $.ajax("data/marathonruns.geojson", {
         dataType: "json",
         success: function(response){
-            L.geoJson(response).addTo(map);
+            L.geoJson(response, {
+                pointToLayer: function(feature, latlng){
+                    if(feature.properties.type_mara == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmanblue.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                    if(feature.properties.type_half == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmanred.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                    if(feature.properties.type_relay == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmanpurple.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                    if(feature.properties.type_10k == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmangreen.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                    if(feature.properties.type_5k == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmanyellow.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                }
+            }).addTo(map);
             var attributes = processData(response);
             mapLayer = createPropSymbols(response, map, attributes, 0, 0);
             createSequenceControls(map, attributes);
