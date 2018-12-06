@@ -113,7 +113,7 @@ function createSequenceControls(map, attributes){
             $(container).append('<button class="previous sequence-control-item" id="previous" title="Previous">Previous</button>');
             $(container).append('<button class="next sequence-control-item" id="next" title="Next">Next</button>');
             $(container).append('<div class="label-wrapper sequence-control-item"><div id="currentMonthText" class="month-label">January</div></div>');
-            $(outerContainer).append('<div id="instruction" class="instruction">Clear Days By Month</div>');
+            $(outerContainer).append('<div id="instruction" class="instruction">Runs By Month</div>');
             $(outerContainer).append(container);
             //enable and disables map functions while using controls
             container.addEventListener('mousedown', function() {
@@ -321,6 +321,7 @@ function getCurrentMonth (index) {
 function processData(data){
     var attributes = [];
     var properties = data.features[0].properties;
+    console.log(properties)
     var monthArray = [
         "January",
         "February",

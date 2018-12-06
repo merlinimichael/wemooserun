@@ -15,7 +15,8 @@ body {
 }
 
 #outerdiv {
-    background: rgba(0,0,0,.9);
+   
+    background-image: url(/img/runningbackgroundclip.png);
     height: 100%;
     width: 95%;
     padding: 20px;
@@ -26,15 +27,31 @@ body {
 
 header.global{
     padding: 1px;
+    background-color: white;
+    background-image: url(/img/runningbackgroundheader.png)
 }
 
 header {
     font-family: 'cabinregular', sans-serif;
-    background-color: #e5f5e0;
     font-size: 50%;
     text-align: center;
 }
 
+h1 {
+    font-family: 'georgia', serif;
+    font-style: normal;
+    font-size:30px;
+    font-weight: bold;
+}
+
+h2 {
+    font-family:'cursive', cursive;
+    font-style:italic;
+    font-size:15px;
+    font-weight: bold;
+    color:darkred
+    
+}
 
  .range-slider {
      flex-basis: 30%;
