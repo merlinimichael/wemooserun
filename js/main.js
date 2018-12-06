@@ -17,8 +17,6 @@ getData(map);
 
 };
 //add circle features to map
-        pointToLayer: function(feature, latlng){
-        },
 // function createPropSymbols(data, map, attributes, index, filterCount){
 //     //create a Leaflet GeoJSON layer and add it to the map
 //    return L.geoJSON(data, {
