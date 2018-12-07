@@ -16,26 +16,26 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
 getData(map);
 
 };
-//add circle features to map
-function createPropSymbols(data, map, attributes, index, filterCount){
-    //create a Leaflet GeoJSON layer and add it to the map
-   return L.geoJSON(data, {
-        pointToLayer: function(feature, latlng){
-            return pointToLayer(feature, latlng, attributes, index);
-        },
-        filter: function(feature, latlng){
-            return feature.properties[attributes[index]] > filterCount;
-        }
-    }).addTo(map);
-};
-
-// calculate the radius of each proportional symbol
-function calcPropRadius(attValue){
-    var scaleFactor = 50;
-    var area = Math.pow(attValue, 1.5) * scaleFactor;
-    var radius = Math.sqrt(area/Math.PI);
-    return radius;
-};
+////add circle features to map
+//function createPropSymbols(data, map, attributes, index, filterCount){
+//    //create a Leaflet GeoJSON layer and add it to the map
+//   return L.geoJSON(data, {
+//        pointToLayer: function(feature, latlng){
+//            return pointToLayer(feature, latlng, attributes, index);
+//        },
+//        filter: function(feature, latlng){
+//            return feature.properties[attributes[index]] > filterCount;
+//        }
+//    }).addTo(map);
+//};
+//
+//// calculate the radius of each proportional symbol
+//function calcPropRadius(attValue){
+//    var scaleFactor = 50;
+//    var area = Math.pow(attValue, 1.5) * scaleFactor;
+//    var radius = Math.sqrt(area/Math.PI);
+//    return radius;
+//};
 
 
 //create point to layer
@@ -113,7 +113,7 @@ function createSequenceControls(map, attributes){
             $(container).append('<button class="previous sequence-control-item" id="previous" title="Previous">Previous</button>');
             $(container).append('<button class="next sequence-control-item" id="next" title="Next">Next</button>');
             $(container).append('<div class="label-wrapper sequence-control-item"><div id="currentMonthText" class="month-label">January</div></div>');
-            $(outerContainer).append('<div id="instruction" class="instruction">Clear Days By Month</div>');
+            $(outerContainer).append('<div id="instruction" class="instruction">Runs By Month</div>');
             $(outerContainer).append(container);
             //enable and disables map functions while using controls
             container.addEventListener('mousedown', function() {
@@ -139,7 +139,7 @@ function addControlListeners(map, attributes, data) {
     //month range slider
     $('#month-slider').click(function(){
         var index = $(this).val();
-        var filterAmount = getDayFilter(document.getElementsByClassName('active')[0].innerText);
+        var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#currentMonthText').text(getCurrentMonth(index));
         updatePropSymbols(map, attributes[index]);
         updateFilter(data, map, attributes, filterAmount);
@@ -148,7 +148,7 @@ function addControlListeners(map, attributes, data) {
     //next button
     $('#next').click(function(){
         var newIndex = $('#month-slider').val() < 11 ? parseInt($('#month-slider').val()) + 1 : 11;
-        var filterAmount = getDayFilter(document.getElementsByClassName('active')[0].innerText);
+        var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#month-slider').val(newIndex).slider;
         $('#currentMonthText').text(getCurrentMonth(newIndex));
         updatePropSymbols(map, attributes[newIndex]);
@@ -158,7 +158,7 @@ function addControlListeners(map, attributes, data) {
     //previous button
     $('#previous').click(function(){
         var newIndex = $('#month-slider').val() > 0 ? parseInt($('#month-slider').val()) - 1 : 0;
-        var filterAmount = getDayFilter(document.getElementsByClassName('active')[0].innerText);
+        var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#month-slider').val(newIndex).slider;
         $('#currentMonthText').text(getCurrentMonth(newIndex));
         updatePropSymbols(map, attributes[newIndex]);
@@ -192,11 +192,11 @@ function addControlListeners(map, attributes, data) {
 function updateFilter(data, map, attributes, filterAmount){
     const index = $('#month-slider').val();
     map.removeLayer(mapLayer);
-    mapLayer = createPropSymbols(data, map, attributes, index, filterAmount);
+//    mapLayer = createPropSymbols(data, map, attributes, index, filterAmount);
 };
 
 //takes filter button text and returns filter amount
-function getDayFilter(buttonText){
+function getRunFilter(buttonText){
     if (buttonText === "Marathon - 26.2 miles"){
         return 5;
     } else if (buttonText === "Half Marathon - 13.1 miles"){
@@ -228,99 +228,100 @@ function getCurrentMonth (index) {
 };
 
 //create temporal legend with SVG
-function createLegend(map, attributes){
-    var LegendControl = L.Control.extend({
-       options: {
-           position: 'bottomright'
-       },
-       onAdd: function(map){
-           var container = L.DomUtil.create('div', 'legend-control-container');
-           $(container).append('<div id="temporal-legend">');
-           var svg = '<svg id="attribute-legend" width="180px" height="180px">';
-           var circles = ["max", "mean", "min"];
-           console.log = "making a legend...";
-           for (var i=0; i<circles.length; i++){
-               svg += '<circle class="legend-circle" id="' + circles[i] + '" fill="#ffffb3" fill-opacity="0.8" stroke="#000000" cx="75"/>';
-           };
-           svg += "</svg>";
-           $(container).append(svg);
-            //enable and disables map functions while using controls
-            container.addEventListener('mousedown', function() {
-                map.dragging.disable();
-            });
-            container.addEventListener('mouseup', function() {
-                map.dragging.enable();
-            });
-            container.addEventListener('mouseover', function() {
-                map.doubleClickZoom.disable();
-            });
-            container.addEventListener('mouseout', function(){
-                map.doubleClickZoom.enable();
-            });
-           return container;
-       } 
-    });
-    map.addControl(new LegendControl());
-    updateLegend(map, attributes[0]);
-};
+//function createLegend(map, attributes){
+//    var LegendControl = L.Control.extend({
+//       options: {
+//           position: 'bottomright'
+//       },
+//       onAdd: function(map){
+//           var container = L.DomUtil.create('div', 'legend-control-container');
+//           $(container).append('<div id="temporal-legend">');
+//           var svg = '<svg id="attribute-legend" width="180px" height="180px">';
+//           var circles = ["max", "mean", "min"];
+//           console.log = "making a legend...";
+//           for (var i=0; i<circles.length; i++){
+//               svg += '<circle class="legend-circle" id="' + circles[i] + '" fill="#ffffb3" fill-opacity="0.8" stroke="#000000" cx="75"/>';
+//           };
+//           svg += "</svg>";
+//           $(container).append(svg);
+//            //enable and disables map functions while using controls
+//            container.addEventListener('mousedown', function() {
+//                map.dragging.disable();
+//            });
+//            container.addEventListener('mouseup', function() {
+//                map.dragging.enable();
+//            });
+//            container.addEventListener('mouseover', function() {
+//                map.doubleClickZoom.disable();
+//            });
+//            container.addEventListener('mouseout', function(){
+//                map.doubleClickZoom.enable();
+//            });
+//           return container;
+//       } 
+//    });
+//    map.addControl(new LegendControl());
+//    updateLegend(map, attributes[0]);
+//};
 
-//update legend as attribute changes
- function updateLegend(map, attributes){
-     var month = attributes;
-     var content = "Clear Days in " + month;
-     $('#temporal-legend').html(content);
-     var circleValues = getCircleValues(map, attributes);
-     for (var key in circleValues){
-         var radius = calcPropRadius(circleValues[key]);
-         $('#'+key).attr({
-             cy: 105 - radius,
-             r: radius
-         });
-     };
- };
+////update legend as attribute changes
+// function updateLegend(map, attributes){
+//     var month = attributes;
+//     var content = "Clear Days in " + month;
+//     $('#temporal-legend').html(content);
+//     var circleValues = getCircleValues(map, attributes);
+//     for (var key in circleValues){
+//         var radius = calcPropRadius(circleValues[key]);
+//         $('#'+key).attr({
+//             cy: 105 - radius,
+//             r: radius
+//         });
+//     };
+// };
 
- //create circle values for temporal legend
- function getCircleValues(map, attribute){
-     var min = Infinity,
-         max = -Infinity;
-    map.eachLayer(function(layer){
-        if(layer.feature){
-            var attributeValue = Number(layer.feature.properties[attribute]);
-            if(attributeValue < min){
-                min=attributeValue;
-            };
-            if(attributeValue > max){
-                max=attributeValue;
-            };
-        };
-    });
-    var mean = (max + min)/2;
-    return {
-        max: max,
-        mean: mean,
-        min: min
-    };
- };
+// //create circle values for temporal legend
+// function getCircleValues(map, attribute){
+//     var min = Infinity,
+//         max = -Infinity;
+//    map.eachLayer(function(layer){
+//        if(layer.feature){
+//            var attributeValue = Number(layer.feature.properties[attribute]);
+//            if(attributeValue < min){
+//                min=attributeValue;
+//            };
+//            if(attributeValue > max){
+//                max=attributeValue;
+//            };
+//        };
+//    });
+//    var mean = (max + min)/2;
+//    return {
+//        max: max,
+//        mean: mean,
+//        min: min
+//    };
+// };
 
-// resizing proprtional symbols according to new attributes
-function updatePropSymbols(map, attributes) {
-    map.eachLayer(function(layer){
-        if (layer.feature && layer.feature.properties[attributes]){
-            var props = layer.feature.properties;
-            var radius = calcPropRadius(props[attributes]);
-            layer.setRadius(radius);
-            var popupContent = "<p><b>" + layer.feature.properties.city + ': </b>' + '\xa0' + layer.feature.properties[attributes] + '\xa0' + "clear days </p>";
-            layer.bindPopup(popupContent,{
-                offset: new L.Point(0, -radius)        
-            });
-        };
-    });
-};
+//// resizing proprtional symbols according to new attributes
+//function updatePropSymbols(map, attributes) {
+//    map.eachLayer(function(layer){
+//        if (layer.feature && layer.feature.properties[attributes]){
+//            var props = layer.feature.properties;
+//            var radius = calcPropRadius(props[attributes]);
+//            layer.setRadius(radius);
+//            var popupContent = "<p><b>" + layer.feature.properties.city + ': </b>' + '\xa0' + layer.feature.properties[attributes] + '\xa0' + "clear days </p>";
+//            layer.bindPopup(popupContent,{
+//                offset: new L.Point(0, -radius)        
+//            });
+//        };
+//    });
+//};
 
 //process the incoming data to sort out by month feature property
 function processData(data){
     var attributes = [];
     var properties = data.features[0].properties;
+    console.log(properties)
     var monthArray = [
         "January",
         "February",
@@ -357,13 +358,60 @@ function getData(map){
     $.ajax("data/marathonruns.geojson", {
         dataType: "json",
         success: function(response){
-            L.geoJson(response).addTo(map);
+            searchLayer = L.geoJson(response, {
+                pointToLayer: function(feature, latlng){
+                    if(feature.properties.type_mara == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmanblue.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                    if(feature.properties.type_half == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmanred.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                    if(feature.properties.type_relay == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmanpurple.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                    if(feature.properties.type_10k == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmangreen.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                    if(feature.properties.type_5k == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmanyellow.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                }
+            }).addTo(map);
+            
+            
+            
             var attributes = processData(response);
-            mapLayer = createPropSymbols(response, map, attributes, 0, 0);
+//            mapLayer = createPropSymbols(response, map, attributes, 0, 0);
             createSequenceControls(map, attributes);
-            createLegend(map, attributes);
+//            createLegend(map, attributes);
             createFilterControls(map, attributes);
             addControlListeners(map, attributes, response);
+            var scale = L.control.scale().addTo(map);
         }
     });
 };
