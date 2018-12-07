@@ -5,7 +5,7 @@ body {
 }
 
 #mapid {
-    height: 80%;
+    height: 65%;
     width: 88%;
     margin: 0px auto;
     position: center;
@@ -16,7 +16,7 @@ body {
 
 #outerdiv {
    
-    background-image: url(/img/runningbackgroundclip.png);
+    background-image: url(/img/landscape.jpg);
     height: 100%;
     width: 95%;
     padding: 20px;
@@ -28,7 +28,7 @@ body {
 header.global{
     padding: 1px;
     background-color: white;
-    background-image: url(/img/runningbackgroundheader.png)
+    background-image: url(/img/landscape.jpg)
 }
 
 header {
