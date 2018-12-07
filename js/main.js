@@ -4,7 +4,7 @@ var mapLayer;
 
 //create map
 function createMap(){
-    var map=L.map('mapid').setView([36.0902, -95.7129],4.15);
+    var map=L.map('mapid').setView([43.5093, -92.1378], 5.55);
     //add tilelayer
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -16,31 +16,35 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
 getData(map);
 
 };
-//add circle features to map
-function createPropSymbols(data, map, attributes, index, filterCount){
-    //create a Leaflet GeoJSON layer and add it to the map
-   return L.geoJSON(data, {
+
+function symbols(data, map, attributes, index, filterCount){
+    return L.geoJSON(data, {
         pointToLayer: function(feature, latlng){
             return pointToLayer(feature, latlng, attributes, index);
         },
         filter: function(feature, latlng){
-            return feature.properties[attributes[index]] > filterCount;
+            return feature.properties[attributes[0]] > filterCount;
         }
     }).addTo(map);
 };
 
-// calculate the radius of each proportional symbol
-function calcPropRadius(attValue){
-    var scaleFactor = 50;
-    var area = Math.pow(attValue, 1.5) * scaleFactor;
-    var radius = Math.sqrt(area/Math.PI);
-    return radius;
-};
+// // calculate the radius of each proportional symbol
+// function calcPropRadius(attValue){
+//     var scaleFactor = 50;
+//     var area = Math.pow(attValue, 1.5) * scaleFactor;
+//     var radius = Math.sqrt(area/Math.PI);
+//     return radius;
+// };
 
 
 //create point to layer
 function pointToLayer(feature, latlng, attributes, index){
-    var attribute = attributes[index];
+    var monthAttribute = feature[attributes[0]];
+    var currentMonth = getCurrentMonth(index);
+    if (monthAttribute !== currentMonth){
+        return;
+    }
+
     var options = {
         fillColor: "#ffffb3",
         color: "#000",
@@ -48,11 +52,11 @@ function pointToLayer(feature, latlng, attributes, index){
         opacity: 1,
         fillOpacity: 0.8
     };
-    var attValue = Number(feature.properties[attribute]);
-    options.radius = calcPropRadius(attValue);
-    var layer = L.circleMarker(latlng, options);
+    // var attValue = Number(feature.properties[attribute]);
+    // options.radius = calcPropRadius(attValue);
+    // // var layer = L.circleMarker(latlng, options);
     //create popup content and bind it to the marker
-    var popupContent = "<p><b>" + feature.properties.city + ': </b>' + '\xa0' + feature.properties[attribute] + '\xa0' + "clear days </p>";
+    var popupContent = "<p><b>" + feature.properties.racename + ': </b>' + '\xa0' + feature.properties[attribute] + '\xa0' + "</p>";
     layer.bindPopup(popupContent,{
         offset: new L.Point(0, -options.radius)
     });
@@ -113,7 +117,7 @@ function createSequenceControls(map, attributes){
             $(container).append('<button class="previous sequence-control-item" id="previous" title="Previous">Previous</button>');
             $(container).append('<button class="next sequence-control-item" id="next" title="Next">Next</button>');
             $(container).append('<div class="label-wrapper sequence-control-item"><div id="currentMonthText" class="month-label">January</div></div>');
-            $(outerContainer).append('<div id="instruction" class="instruction">Clear Days By Month</div>');
+            $(outerContainer).append('<div id="instruction" class="instruction">Months</div>');
             $(outerContainer).append(container);
             //enable and disables map functions while using controls
             container.addEventListener('mousedown', function() {
@@ -136,12 +140,13 @@ function createSequenceControls(map, attributes){
 
 //add control listeners to the map for the range slider, previous/next buttons, legend, and filter
 function addControlListeners(map, attributes, data) {
+    console.log(data);
     //month range slider
     $('#month-slider').click(function(){
         var index = $(this).val();
         var filterAmount = getDayFilter(document.getElementsByClassName('active')[0].innerText);
         $('#currentMonthText').text(getCurrentMonth(index));
-        updatePropSymbols(map, attributes[index]);
+        updatePropSymbols(map, getCurrentMonth(newIndex));
         updateFilter(data, map, attributes, filterAmount);
         updateLegend(map, attributes[index]);
     });
@@ -151,7 +156,7 @@ function addControlListeners(map, attributes, data) {
         var filterAmount = getDayFilter(document.getElementsByClassName('active')[0].innerText);
         $('#month-slider').val(newIndex).slider;
         $('#currentMonthText').text(getCurrentMonth(newIndex));
-        updatePropSymbols(map, attributes[newIndex]);
+        updatePropSymbols(map, getCurrentMonth(newIndex));
         updateFilter(data, map, attributes, filterAmount);
         updateLegend(map, attributes[newIndex]);
     });
@@ -161,9 +166,8 @@ function addControlListeners(map, attributes, data) {
         var filterAmount = getDayFilter(document.getElementsByClassName('active')[0].innerText);
         $('#month-slider').val(newIndex).slider;
         $('#currentMonthText').text(getCurrentMonth(newIndex));
-        updatePropSymbols(map, attributes[newIndex]);
+        updatePropSymbols(map, getCurrentMonth(newIndex));
         updateFilter(data, map, attributes, filterAmount);
-
         updateLegend(map, attributes[newIndex]);
     });
     //filter menu controller
@@ -192,7 +196,7 @@ function addControlListeners(map, attributes, data) {
 function updateFilter(data, map, attributes, filterAmount){
     const index = $('#month-slider').val();
     map.removeLayer(mapLayer);
-    mapLayer = createPropSymbols(data, map, attributes, index, filterAmount);
+    mapLayer = symbols(data, map, attributes, index, filterAmount);
 };
 
 //takes filter button text and returns filter amount
@@ -208,7 +212,7 @@ function getDayFilter(buttonText){
     };
 };
 
-//create array of months
+//THIS IS WHAT"S USED TO GET MONTH - we can create array for the race month as well
 function getCurrentMonth (index) {
     var monthArray = [
         "January",
@@ -237,13 +241,13 @@ function createLegend(map, attributes){
            var container = L.DomUtil.create('div', 'legend-control-container');
            $(container).append('<div id="temporal-legend">');
            var svg = '<svg id="attribute-legend" width="180px" height="180px">';
-           var circles = ["max", "mean", "min"];
-           console.log = "making a legend...";
-           for (var i=0; i<circles.length; i++){
-               svg += '<circle class="legend-circle" id="' + circles[i] + '" fill="#ffffb3" fill-opacity="0.8" stroke="#000000" cx="75"/>';
-           };
-           svg += "</svg>";
-           $(container).append(svg);
+        //    var circles = ["max", "mean", "min"];
+           //CREATES THE SVG FOR THE "DOTS"
+        //    for (var i=0; i<circles.length; i++){
+        //        svg += '<circle class="legend-circle" id="' + circles[i] + '" fill="#ffffb3" fill-opacity="0.8" stroke="#000000" cx="75"/>';
+        //    };
+        //    svg += "</svg>";
+        //    $(container).append(svg);
             //enable and disables map functions while using controls
             container.addEventListener('mousedown', function() {
                 map.dragging.disable();
@@ -267,86 +271,87 @@ function createLegend(map, attributes){
 //update legend as attribute changes
  function updateLegend(map, attributes){
      var month = attributes;
-     var content = "Clear Days in " + month;
+     var content = "Race Types";
+    //  var content = "Number of Races " + month;
      $('#temporal-legend').html(content);
-     var circleValues = getCircleValues(map, attributes);
-     for (var key in circleValues){
-         var radius = calcPropRadius(circleValues[key]);
-         $('#'+key).attr({
-             cy: 105 - radius,
-             r: radius
-         });
-     };
+    //  var circleValues = getCircleValues(map, attributes);
+    //  for (var key in circleValues){
+    //      var radius = calcPropRadius(circleValues[key]);
+    //      $('#'+key).attr({
+    //          cy: 105 - radius,
+    //          r: radius
+    //      });
+    //  };
  };
 
- //create circle values for temporal legend
- function getCircleValues(map, attribute){
-     var min = Infinity,
-         max = -Infinity;
-    map.eachLayer(function(layer){
-        if(layer.feature){
-            var attributeValue = Number(layer.feature.properties[attribute]);
-            if(attributeValue < min){
-                min=attributeValue;
-            };
-            if(attributeValue > max){
-                max=attributeValue;
-            };
-        };
-    });
-    var mean = (max + min)/2;
-    return {
-        max: max,
-        mean: mean,
-        min: min
-    };
- };
+ //create circle values for temporal legend - THIS ISN"T NEEDED ANY MORE
+//  function getCircleValues(map, attribute){
+//      var min = Infinity,
+//          max = -Infinity;
+//     map.eachLayer(function(layer){
+//         if(layer.feature){
+//             var attributeValue = Number(layer.feature.properties[attribute]);
+//             if(attributeValue < min){
+//                 min=attributeValue;
+//             };
+//             if(attributeValue > max){
+//                 max=attributeValue;
+//             };
+//         };
+//     });
+//     var mean = (max + min)/2;
+//     return {
+//         max: max,
+//         mean: mean,
+//         min: min
+//     };
+//  };
 
-// resizing proprtional symbols according to new attributes
-function updatePropSymbols(map, attributes) {
+function updatePropSymbols(map, attribute) {
     map.eachLayer(function(layer){
-        if (layer.feature && layer.feature.properties[attributes]){
+        if (layer.feature && layer.feature.properties[attribute]){
             var props = layer.feature.properties;
-            var radius = calcPropRadius(props[attributes]);
-            layer.setRadius(radius);
-            var popupContent = "<p><b>" + layer.feature.properties.city + ': </b>' + '\xa0' + layer.feature.properties[attributes] + '\xa0' + "clear days </p>";
+            // var radius = calcPropRadius(props[attributes]);
+            // layer.setRadius(radius);
+            var popupContent = "<p><b>" + layer.feature.properties.city + ': </b>' + '\xa0' + layer.feature.properties[attribute] + '\xa0' + "clear days </p>";
             layer.bindPopup(popupContent,{
-                offset: new L.Point(0, -radius)        
+                offset: new L.Point(0)        
             });
         };
     });
 };
 
-//process the incoming data to sort out by month feature property
+//process the incoming data: I think we want to make a list of attribute names
 function processData(data){
-    var attributes = [];
-    var properties = data.features[0].properties;
-    var monthArray = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December"
-    ];
-    for (var attribute in properties){
-        var found = false;
-        for (var month in monthArray){
-            if(attribute.indexOf(monthArray[month])>-1){
-                found = true;
-                break;
-            }
-        }
-        if (found){
-            attributes.push(attribute);
-        }
-    };
+    var attributes = ["date","type_mara","type_half","type_relay","type_10k","type_5k"];
+    console.log(attributes);
+    // var properties = data.features[0].properties;
+    // var monthArray = [
+    //     "January",
+    //     "February",
+    //     "March",
+    //     "April",
+    //     "May",
+    //     "June",
+    //     "July",
+    //     "August",
+    //     "September",
+    //     "October",
+    //     "November",
+    //     "December"
+    // ];
+    // for (var attribute in properties){
+    //     var found = false;
+    //     for (var month in monthArray){
+    //         if(attribute.indexOf(monthArray[month])>-1){
+    //             found = true;
+    //             break;
+    //         }
+    //     }
+    //     if (found){
+    //         attributes.push(attribute);
+    //     }
+    // };
     return attributes;
  };
 
@@ -359,7 +364,7 @@ function getData(map){
         success: function(response){
             L.geoJson(response).addTo(map);
             var attributes = processData(response);
-            mapLayer = createPropSymbols(response, map, attributes, 0, 0);
+            mapLayer = symbols(response, map, attributes, 0, 0);
             createSequenceControls(map, attributes);
             createLegend(map, attributes);
             createFilterControls(map, attributes);
