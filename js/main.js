@@ -27,7 +27,6 @@ function symbols(data, map, attributes, index, filterAmount){
         },
         filter: function(feature, latlng){
             return feature.properties[filterAmount] === "x"
-            // return feature.properties[attributes[index]] > filterAmount;
         }
     }).addTo(map);
 };
@@ -89,7 +88,7 @@ function createFilterControls(map, attributes){
         },
         onAdd: function(map){
             var container = L.DomUtil.create('div', 'filter-control-container');
-            $(container).append('<nav class="menu-ui"><a href="#" data-filter="marathon" class="active marathon">Marathon - 26.2 miles</a><a href="#" data-filer="halfmarathon" class="halfmarathon">Half Marathon - 13.1 miles</a><a \
+            $(container).append('<nav class="menu-ui"><a href="#" data-filter="marathon" class="marathon">Marathon - 26.2 miles</a><a href="#" data-filer="halfmarathon" class="halfmarathon">Half Marathon - 13.1 miles</a><a \
             href="#" data-filter="marathonrelay" class="marathonrelay">Marathon Relay</a><a href="#" data-filter="10k" class="10k">10k - 6.2 miles</a><a href="#" data-filter="5k" class="5k">5k - 3.1 miles</a></nav>');
             //enable and disables map functions while using controls
             container.addEventListener('mousedown', function() {
@@ -286,7 +285,11 @@ function getData(map){
         dataType: "json",
         success: function(response){
             var attributes = processData(response);
-            mapLayer == symbols(response, map, attributes, 0, "type_mara");
+            mapLayer = L.geoJson(response, {
+                pointToLayer: function(feature, latlng){
+                    return pointToLayer(feature, latlng, attributes, 'type_mara');           
+                }
+            }).addTo(map);
             createSequenceControls(map, attributes);
             createLegend(map, attributes);
             createFilterControls(map, attributes);
