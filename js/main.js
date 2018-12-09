@@ -117,7 +117,7 @@ function createSequenceControls(map, attributes){
             $(container).append('<button class="previous sequence-control-item" id="previous" title="Previous">Previous</button>');
             $(container).append('<button class="next sequence-control-item" id="next" title="Next">Next</button>');
             $(container).append('<div class="label-wrapper sequence-control-item"><div id="currentMonthText" class="month-label">January</div></div>');
-            $(outerContainer).append('<div id="instruction" class="instruction">Months</div>');
+            $(outerContainer).append('<div id="instruction" class="instruction">Runs By Month</div>');
             $(outerContainer).append(container);
             //enable and disables map functions while using controls
             container.addEventListener('mousedown', function() {
@@ -144,7 +144,7 @@ function addControlListeners(map, attributes, data) {
     //month range slider
     $('#month-slider').click(function(){
         var index = $(this).val();
-        var filterAmount = getDayFilter(document.getElementsByClassName('active')[0].innerText);
+        var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#currentMonthText').text(getCurrentMonth(index));
         updatePropSymbols(map, getCurrentMonth(newIndex));
         updateFilter(data, map, attributes, filterAmount);
@@ -153,7 +153,7 @@ function addControlListeners(map, attributes, data) {
     //next button
     $('#next').click(function(){
         var newIndex = $('#month-slider').val() < 11 ? parseInt($('#month-slider').val()) + 1 : 11;
-        var filterAmount = getDayFilter(document.getElementsByClassName('active')[0].innerText);
+        var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#month-slider').val(newIndex).slider;
         $('#currentMonthText').text(getCurrentMonth(newIndex));
         updatePropSymbols(map, getCurrentMonth(newIndex));
@@ -163,7 +163,7 @@ function addControlListeners(map, attributes, data) {
     //previous button
     $('#previous').click(function(){
         var newIndex = $('#month-slider').val() > 0 ? parseInt($('#month-slider').val()) - 1 : 0;
-        var filterAmount = getDayFilter(document.getElementsByClassName('active')[0].innerText);
+        var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#month-slider').val(newIndex).slider;
         $('#currentMonthText').text(getCurrentMonth(newIndex));
         updatePropSymbols(map, getCurrentMonth(newIndex));
@@ -200,7 +200,7 @@ function updateFilter(data, map, attributes, filterAmount){
 };
 
 //takes filter button text and returns filter amount
-function getDayFilter(buttonText){
+function getRunFilter(buttonText){
     if (buttonText === "Marathon - 26.2 miles"){
         return 5;
     } else if (buttonText === "Half Marathon - 13.1 miles"){
@@ -362,13 +362,60 @@ function getData(map){
     $.ajax("data/marathonruns.geojson", {
         dataType: "json",
         success: function(response){
-            L.geoJson(response).addTo(map);
+            searchLayer = L.geoJson(response, {
+                pointToLayer: function(feature, latlng){
+                    if(feature.properties.type_mara == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmanblue.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                    if(feature.properties.type_half == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmanred.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                    if(feature.properties.type_relay == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmanpurple.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                    if(feature.properties.type_10k == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmangreen.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                    if(feature.properties.type_5k == 'x')
+                        return L.marker(latlng, {icon:L.icon({
+                                iconUrl: "img/runningmanyellow.PNG",
+                                iconSize: [40, 40],   
+                                iconAnchor: [20, 40],
+                                popupAnchor: [0, -28]
+                                })
+                        });
+                }
+            }).addTo(map);
+            
+            
+            
             var attributes = processData(response);
             mapLayer = symbols(response, map, attributes, 0, 0);
             createSequenceControls(map, attributes);
-            createLegend(map, attributes);
+//            createLegend(map, attributes);
             createFilterControls(map, attributes);
             addControlListeners(map, attributes, response);
+            var scale = L.control.scale().addTo(map);
         }
     });
 };
