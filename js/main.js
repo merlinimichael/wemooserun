@@ -4,7 +4,7 @@ var mapLayer;
 
 //create map
 function createMap(){
-    var map=L.map('mapid').setView([36.0902, -95.7129],4.15);
+    var map=L.map('mapid').setView([43.5093, -92.1378], 5.55);
     //add tilelayer
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -16,58 +16,46 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
 getData(map);
 
 };
-////add circle features to map
-//function createPropSymbols(data, map, attributes, index, filterCount){
-//    //create a Leaflet GeoJSON layer and add it to the map
-//   return L.geoJSON(data, {
-//        pointToLayer: function(feature, latlng){
-//            return pointToLayer(feature, latlng, attributes, index);
-//        },
-//        filter: function(feature, latlng){
-//            return feature.properties[attributes[index]] > filterCount;
-//        }
-//    }).addTo(map);
-//};
-//
-//// calculate the radius of each proportional symbol
-//function calcPropRadius(attValue){
-//    var scaleFactor = 50;
-//    var area = Math.pow(attValue, 1.5) * scaleFactor;
-//    var radius = Math.sqrt(area/Math.PI);
-//    return radius;
-//};
 
+function symbols(data, map, attributes, index, filterCount){
+    return L.geoJSON(data, {
+        pointToLayer: function(feature, latlng){
+            return pointToLayer(feature, latlng, attributes, index);
+        },
+        // filter: function(feature, latlng){
+        //     return feature.properties[attributes[0]] > filterCount;
+        // }
+    }).addTo(map);
+};
 
 //create point to layer
 function pointToLayer(feature, latlng, attributes, index){
-    var attribute = attributes[index];
-    var options = {
-        fillColor: "#ffffb3",
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
+    if(feature.properties.date == getCurrentMonth(index)){
+        var layer = L.marker(latlng, {icon:L.icon({
+            iconUrl: "img/runningmanred.PNG",
+            iconSize: [40, 40],   
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -28]
+            })
+        });
+        //create popup content and bind it to the marker
+        var popupContent = "<p><b>" + feature.properties.racename + ': </b>' + '\xa0' + feature.properties[attributes] + '\xa0' + "</p>";
+        layer.bindPopup(popupContent,{
+            offset: new L.Point(0)
+        });
+        layer.on({
+            mouseover: function(){
+                this.openPopup();
+            },
+            mouseout: function(){
+                this.closePopup();
+            },
+            click: function(){
+                $('#panel').html(popupContent);
+            }
+        })
+        return layer;
     };
-    var attValue = Number(feature.properties[attribute]);
-    options.radius = calcPropRadius(attValue);
-    var layer = L.circleMarker(latlng, options);
-    //create popup content and bind it to the marker
-    var popupContent = "<p><b>" + feature.properties.city + ': </b>' + '\xa0' + feature.properties[attribute] + '\xa0' + "clear days </p>";
-    layer.bindPopup(popupContent,{
-        offset: new L.Point(0, -options.radius)
-    });
-    layer.on({
-        mouseover: function(){
-            this.openPopup();
-        },
-        mouseout: function(){
-            this.closePopup();
-        },
-        click: function(){
-            $('#panel').html(popupContent);
-        }
-    });
-    return layer;
 };
 
 //create filter control 
@@ -136,12 +124,13 @@ function createSequenceControls(map, attributes){
 
 //add control listeners to the map for the range slider, previous/next buttons, legend, and filter
 function addControlListeners(map, attributes, data) {
+    console.log(data);
     //month range slider
     $('#month-slider').click(function(){
         var index = $(this).val();
         var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#currentMonthText').text(getCurrentMonth(index));
-        updatePropSymbols(map, attributes[index]);
+        // updatePopup(map, getCurrentMonth(index));
         updateFilter(data, map, attributes, filterAmount);
         updateLegend(map, attributes[index]);
     });
@@ -151,7 +140,7 @@ function addControlListeners(map, attributes, data) {
         var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#month-slider').val(newIndex).slider;
         $('#currentMonthText').text(getCurrentMonth(newIndex));
-        updatePropSymbols(map, attributes[newIndex]);
+        // updatePopup(map, getCurrentMonth(newIndex));
         updateFilter(data, map, attributes, filterAmount);
         updateLegend(map, attributes[newIndex]);
     });
@@ -161,9 +150,8 @@ function addControlListeners(map, attributes, data) {
         var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#month-slider').val(newIndex).slider;
         $('#currentMonthText').text(getCurrentMonth(newIndex));
-        updatePropSymbols(map, attributes[newIndex]);
+        // updatePopup(map, getCurrentMonth(newIndex));
         updateFilter(data, map, attributes, filterAmount);
-
         updateLegend(map, attributes[newIndex]);
     });
     //filter menu controller
@@ -192,7 +180,7 @@ function addControlListeners(map, attributes, data) {
 function updateFilter(data, map, attributes, filterAmount){
     const index = $('#month-slider').val();
     map.removeLayer(mapLayer);
-//    mapLayer = createPropSymbols(data, map, attributes, index, filterAmount);
+    mapLayer = symbols(data, map, attributes, index, filterAmount);
 };
 
 //takes filter button text and returns filter amount
@@ -208,11 +196,11 @@ function getRunFilter(buttonText){
     };
 };
 
-//create array of months
+//THIS IS WHAT"S USED TO GET MONTH - we can create array for the race month as well
 function getCurrentMonth (index) {
     var monthArray = [
         "January",
-        "Feburary",
+        "February",
         "March",
         "April",
         "May",
@@ -228,126 +216,126 @@ function getCurrentMonth (index) {
 };
 
 //create temporal legend with SVG
-//function createLegend(map, attributes){
-//    var LegendControl = L.Control.extend({
-//       options: {
-//           position: 'bottomright'
-//       },
-//       onAdd: function(map){
-//           var container = L.DomUtil.create('div', 'legend-control-container');
-//           $(container).append('<div id="temporal-legend">');
-//           var svg = '<svg id="attribute-legend" width="180px" height="180px">';
-//           var circles = ["max", "mean", "min"];
-//           console.log = "making a legend...";
-//           for (var i=0; i<circles.length; i++){
-//               svg += '<circle class="legend-circle" id="' + circles[i] + '" fill="#ffffb3" fill-opacity="0.8" stroke="#000000" cx="75"/>';
-//           };
-//           svg += "</svg>";
-//           $(container).append(svg);
-//            //enable and disables map functions while using controls
-//            container.addEventListener('mousedown', function() {
-//                map.dragging.disable();
-//            });
-//            container.addEventListener('mouseup', function() {
-//                map.dragging.enable();
-//            });
-//            container.addEventListener('mouseover', function() {
-//                map.doubleClickZoom.disable();
-//            });
-//            container.addEventListener('mouseout', function(){
-//                map.doubleClickZoom.enable();
-//            });
-//           return container;
-//       } 
-//    });
-//    map.addControl(new LegendControl());
-//    updateLegend(map, attributes[0]);
-//};
+function createLegend(map, attributes){
+    var LegendControl = L.Control.extend({
+       options: {
+           position: 'bottomright'
+       },
+       onAdd: function(map){
+           var container = L.DomUtil.create('div', 'legend-control-container');
+           $(container).append('<div id="temporal-legend">');
+           var svg = '<svg id="attribute-legend" width="180px" height="180px">';
+        //    var circles = ["max", "mean", "min"];
+           //CREATES THE SVG FOR THE "DOTS"
+        //    for (var i=0; i<circles.length; i++){
+        //        svg += '<circle class="legend-circle" id="' + circles[i] + '" fill="#ffffb3" fill-opacity="0.8" stroke="#000000" cx="75"/>';
+        //    };
+        //    svg += "</svg>";
+        //    $(container).append(svg);
+            //enable and disables map functions while using controls
+            container.addEventListener('mousedown', function() {
+                map.dragging.disable();
+            });
+            container.addEventListener('mouseup', function() {
+                map.dragging.enable();
+            });
+            container.addEventListener('mouseover', function() {
+                map.doubleClickZoom.disable();
+            });
+            container.addEventListener('mouseout', function(){
+                map.doubleClickZoom.enable();
+            });
+           return container;
+       } 
+    });
+    map.addControl(new LegendControl());
+    updateLegend(map, attributes[0]);
+};
 
-////update legend as attribute changes
-// function updateLegend(map, attributes){
-//     var month = attributes;
-//     var content = "Clear Days in " + month;
-//     $('#temporal-legend').html(content);
-//     var circleValues = getCircleValues(map, attributes);
-//     for (var key in circleValues){
-//         var radius = calcPropRadius(circleValues[key]);
-//         $('#'+key).attr({
-//             cy: 105 - radius,
-//             r: radius
-//         });
+//update legend as attribute changes
+ function updateLegend(map, attributes){
+     var month = attributes;
+     var content = "Race Types";
+    //  var content = "Number of Races " + month;
+     $('#temporal-legend').html(content);
+    //  var circleValues = getCircleValues(map, attributes);
+    //  for (var key in circleValues){
+    //      var radius = calcPropRadius(circleValues[key]);
+    //      $('#'+key).attr({
+    //          cy: 105 - radius,
+    //          r: radius
+    //      });
+    //  };
+ };
+
+ //create circle values for temporal legend - THIS ISN"T NEEDED ANY MORE
+//  function getCircleValues(map, attribute){
+//      var min = Infinity,
+//          max = -Infinity;
+//     map.eachLayer(function(layer){
+//         if(layer.feature){
+//             var attributeValue = Number(layer.feature.properties[attribute]);
+//             if(attributeValue < min){
+//                 min=attributeValue;
+//             };
+//             if(attributeValue > max){
+//                 max=attributeValue;
+//             };
+//         };
+//     });
+//     var mean = (max + min)/2;
+//     return {
+//         max: max,
+//         mean: mean,
+//         min: min
 //     };
-// };
+//  };
 
-// //create circle values for temporal legend
-// function getCircleValues(map, attribute){
-//     var min = Infinity,
-//         max = -Infinity;
-//    map.eachLayer(function(layer){
-//        if(layer.feature){
-//            var attributeValue = Number(layer.feature.properties[attribute]);
-//            if(attributeValue < min){
-//                min=attributeValue;
-//            };
-//            if(attributeValue > max){
-//                max=attributeValue;
-//            };
-//        };
-//    });
-//    var mean = (max + min)/2;
-//    return {
-//        max: max,
-//        mean: mean,
-//        min: min
-//    };
-// };
+function updatePopup(map, attribute) {
+    map.eachLayer(function(layer){
+        if (layer.feature && layer.feature.properties[attribute]){
+            var props = layer.feature.properties;
+            // var radius = calcPropRadius(props[attributes]);
+            // layer.setRadius(radius);
+            var popupContent = "<p><b>" + layer.feature.properties.city + ': </b>' + '\xa0' + layer.feature.properties[attribute] + '\xa0' + "clear days </p>";
+            layer.bindPopup(popupContent,{
+                offset: new L.Point(0)        
+            });
+        };
+    });
+};
 
-//// resizing proprtional symbols according to new attributes
-//function updatePropSymbols(map, attributes) {
-//    map.eachLayer(function(layer){
-//        if (layer.feature && layer.feature.properties[attributes]){
-//            var props = layer.feature.properties;
-//            var radius = calcPropRadius(props[attributes]);
-//            layer.setRadius(radius);
-//            var popupContent = "<p><b>" + layer.feature.properties.city + ': </b>' + '\xa0' + layer.feature.properties[attributes] + '\xa0' + "clear days </p>";
-//            layer.bindPopup(popupContent,{
-//                offset: new L.Point(0, -radius)        
-//            });
-//        };
-//    });
-//};
-
-//process the incoming data to sort out by month feature property
+//process the incoming data: I think we want to make a list of attribute names
 function processData(data){
-    var attributes = [];
-    var properties = data.features[0].properties;
-    console.log(properties)
-    var monthArray = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December"
-    ];
-    for (var attribute in properties){
-        var found = false;
-        for (var month in monthArray){
-            if(attribute.indexOf(monthArray[month])>-1){
-                found = true;
-                break;
-            }
-        }
-        if (found){
-            attributes.push(attribute);
-        }
-    };
+    var attributes = ["date","type_mara","type_half","type_relay","type_10k","type_5k"];
+    console.log(attributes);
+    // var properties = data.features[0].properties;
+    // var monthArray = [
+    //     "January",
+    //     "February",
+    //     "March",
+    //     "April",
+    //     "May",
+    //     "June",
+    //     "July",
+    //     "August",
+    //     "September",
+    //     "October",
+    //     "November",
+    //     "December"
+    // ];
+    // for (var attribute in properties){
+    //     var found = false;
+    //     for (var month in monthArray){
+    //         if(attribute.indexOf(monthArray[month])>-1){
+    //             found = true;
+    //             break;
+    //         }
+    //     }
+    //     if (found){
+    //         attributes.push(attribute);
+    //     }
+    // };
     return attributes;
  };
 
@@ -358,55 +346,14 @@ function getData(map){
     $.ajax("data/marathonruns.geojson", {
         dataType: "json",
         success: function(response){
-            searchLayer = L.geoJson(response, {
+            var attributes = processData(response);
+            mapLayer = L.geoJson(response, {
                 pointToLayer: function(feature, latlng){
-                    if(feature.properties.type_mara == 'x')
-                        return L.marker(latlng, {icon:L.icon({
-                                iconUrl: "img/runningmanblue.PNG",
-                                iconSize: [40, 40],   
-                                iconAnchor: [20, 40],
-                                popupAnchor: [0, -28]
-                                })
-                        });
-                    if(feature.properties.type_half == 'x')
-                        return L.marker(latlng, {icon:L.icon({
-                                iconUrl: "img/runningmanred.PNG",
-                                iconSize: [40, 40],   
-                                iconAnchor: [20, 40],
-                                popupAnchor: [0, -28]
-                                })
-                        });
-                    if(feature.properties.type_relay == 'x')
-                        return L.marker(latlng, {icon:L.icon({
-                                iconUrl: "img/runningmanpurple.PNG",
-                                iconSize: [40, 40],   
-                                iconAnchor: [20, 40],
-                                popupAnchor: [0, -28]
-                                })
-                        });
-                    if(feature.properties.type_10k == 'x')
-                        return L.marker(latlng, {icon:L.icon({
-                                iconUrl: "img/runningmangreen.PNG",
-                                iconSize: [40, 40],   
-                                iconAnchor: [20, 40],
-                                popupAnchor: [0, -28]
-                                })
-                        });
-                    if(feature.properties.type_5k == 'x')
-                        return L.marker(latlng, {icon:L.icon({
-                                iconUrl: "img/runningmanyellow.PNG",
-                                iconSize: [40, 40],   
-                                iconAnchor: [20, 40],
-                                popupAnchor: [0, -28]
-                                })
-                        });
+                    return pointToLayer(feature, latlng, attributes, 0);           
                 }
             }).addTo(map);
-            
-            
-            
-            var attributes = processData(response);
-//            mapLayer = createPropSymbols(response, map, attributes, 0, 0);
+
+            // mapLayer = symbols(response, map, attributes, 0, 0);
             createSequenceControls(map, attributes);
 //            createLegend(map, attributes);
             createFilterControls(map, attributes);
