@@ -4,7 +4,9 @@ var mapLayer;
 
 //create map
 function createMap(){
+
     var map=L.map('mapid').setView([43.5093, -92.1378], 5.55);
+    
     //add tilelayer
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -18,9 +20,10 @@ getData(map);
 };
 
 function symbols(data, map, attributes, index, filterAmount){
+    console.log(filterAmount)
     return L.geoJSON(data, {
         pointToLayer: function(feature, latlng){
-            return pointToLayer(feature, latlng, attributes, index);
+            return pointToLayer(feature, latlng, attributes, index, filterAmount);
         },
         filter: function(feature, latlng){
             return feature.properties[filterAmount] === "x"
@@ -30,10 +33,30 @@ function symbols(data, map, attributes, index, filterAmount){
 };
 
 //create point to layer
-function pointToLayer(feature, latlng, attributes, index){
+function pointToLayer(feature, latlng, attributes, index, filterAmount){
+    var picture =""
+    console.log(filterAmount);
+    if(filterAmount == "type_mara"){
+        picture = "img/runningmanblue.PNG"
+    }
+    else if(filterAmount == "type_half"){
+        picture = "img/runningmanred.PNG"
+    }
+    else if(filterAmount == "type_relay"){
+        picture = "img/runningmanpurple.PNG"
+    }
+    else if (filterAmount =="type_10k"){
+        picture = "img/runningmanyellow.PNG"
+    }
+    else if (filterAmount == "type_5k"){
+        picture = "img/runningmanred.PNG"
+    }
+    
+    
+    
     if(feature.properties.date == getCurrentMonth(index)){
         var layer = L.marker(latlng, {icon:L.icon({
-            iconUrl: "img/runningmanred.PNG",
+            iconUrl: picture,
             iconSize: [40, 40],   
             iconAnchor: [20, 40],
             popupAnchor: [0, -28]
@@ -128,6 +151,7 @@ function addControlListeners(map, attributes, data) {
     $('#month-slider').click(function(){
         var index = $(this).val();
         var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
+
         $('#currentMonthText').text(getCurrentMonth(index));
         updatePopup(map, getCurrentMonth(index));
         updateFilter(data, map, attributes, filterAmount);
@@ -298,7 +322,7 @@ function getData(map){
             var attributes = processData(response);
             mapLayer = L.geoJson(response, {
                 pointToLayer: function(feature, latlng){
-                    return pointToLayer(feature, latlng, attributes, 0);           
+                    return pointToLayer(feature, latlng, attributes, 'type_mara');           
                 }
             }).addTo(map);
             createSequenceControls(map, attributes);

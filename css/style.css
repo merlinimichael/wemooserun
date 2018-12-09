@@ -10,7 +10,7 @@ body{
     margin: 0px auto;
     position: center;
     padding: 5px;
-    border: 1px solid blue;
+    border: 5px solid lightgray;
     display: inline-block;
 }
 
@@ -49,13 +49,16 @@ header {
 
 h1 {
     height: 20px;
-    font-family: 'Poiret One', cursive;
+/*    font-family: 'Poiret One', cursive;*/
+/*    font-family: 'Ubuntu', sans-serif;*/
+    font-family: 'Bangers', cursive;
     font-style: normal;
     font-size:40px;
     font-weight: bold;
     text-transform: uppercase;
     text-shadow: 2px 2px 7px #111111;
-    color: darkred
+    color: darkred;
+    letter-spacing: 0.2em
 }
 
 h2 {
