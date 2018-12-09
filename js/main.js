@@ -63,10 +63,9 @@ function pointToLayer(feature, latlng, attributes, index, filterAmount){
             })
         });
         //create popup content and bind it to the marker
-        var popupContent = "<p><b>" + feature.properties.racename + ': </b>' + '\xa0' + feature.properties[attributes] + '\xa0' + "</p>";
-        layer.bindPopup(popupContent,{
-            offset: new L.Point(0)
-        });
+        var popupContent = "<p><b>" + feature.properties.city + "," + '\xa0' + feature.properties.state + ': </b>' + '\xa0' + feature.properties.racename + '\xa0' + "</p>" + "<p><b>"
+            + "Race URL" + ': </b>' + feature.properties.url + "</p>";
+        layer.bindPopup(popupContent);
         layer.on({
             mouseover: function(){
                 this.openPopup();
@@ -185,7 +184,6 @@ function addControlListeners(map, attributes, data) {
     //greater than five filter controller
     $('.marathon').click(function(){
         updateFilter(data, map, attributes, "type_mara")
-        console.log("pizza");
     });
     //greater than 10 filter controller
     $('.halfmarathon').click(function(){
@@ -297,37 +295,13 @@ function createLegend(map, attributes){
     //  };
  };
 
- //create circle values for temporal legend - THIS ISN"T NEEDED ANY MORE
-//  function getCircleValues(map, attribute){
-//      var min = Infinity,
-//          max = -Infinity;
-//     map.eachLayer(function(layer){
-//         if(layer.feature){
-//             var attributeValue = Number(layer.feature.properties[attribute]);
-//             if(attributeValue < min){
-//                 min=attributeValue;
-//             };
-//             if(attributeValue > max){
-//                 max=attributeValue;
-//             };
-//         };
-//     });
-//     var mean = (max + min)/2;
-//     return {
-//         max: max,
-//         mean: mean,
-//         min: min
-//     };
-//  };
-
 function updatePopup(map, attribute) {
     map.eachLayer(function(layer){
         if (layer.feature && layer.feature.properties[attribute]){
             var props = layer.feature.properties;
-            var popupContent = "<p><b>" + layer.feature.properties.city + ': </b>' + '\xa0' + layer.feature.properties[attribute] + '\xa0' + "clear days </p>";
-            layer.bindPopup(popupContent,{
-                offset: new L.Point(0)        
-            });
+            var popupContent = "<p><b>" + feature.properties.city + "," + '\xa0' + feature.properties.state + ': </b>' + '\xa0' + feature.properties.racename + '\xa0' + "</p>" + "<p><b>"
+            + "Race URL" + ': </b>' + feature.properties.url + "</p>";
+            layer.bindPopup(popupContent);
         };
     });
 };
@@ -351,8 +325,6 @@ function getData(map){
                     return pointToLayer(feature, latlng, attributes, 'type_mara');           
                 }
             }).addTo(map);
-           
-            // mapLayer = symbols(response, map, attributes, 0, 0);
             createSequenceControls(map, attributes);
 //            createLegend(map, attributes);
             createFilterControls(map, attributes);
