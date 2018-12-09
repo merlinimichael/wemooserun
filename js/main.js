@@ -4,7 +4,7 @@ var mapLayer;
 
 //create map
 function createMap(){
-    var map=L.map('mapid').setView([36.0902, -95.7129],4.15);
+    var map=L.map('mapid').setView([44.0902, -95.7129],4.25);
     //add tilelayer
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
