@@ -155,7 +155,6 @@ function addControlListeners(map, attributes, data) {
         $('#currentMonthText').text(getCurrentMonth(index));
         updatePopup(map, getCurrentMonth(index));
         updateFilter(data, map, attributes, filterAmount);
-        updateLegend(map, attributes[index]);
     });
     //next button
     $('#next').click(function(){
@@ -165,7 +164,6 @@ function addControlListeners(map, attributes, data) {
         $('#currentMonthText').text(getCurrentMonth(newIndex));
         updatePopup(map, getCurrentMonth(newIndex));
         updateFilter(data, map, attributes, filterAmount);
-        updateLegend(map, attributes[newIndex]);
     });
     //previous button
     $('#previous').click(function(){
@@ -175,7 +173,6 @@ function addControlListeners(map, attributes, data) {
         $('#currentMonthText').text(getCurrentMonth(newIndex));
         updatePopup(map, getCurrentMonth(newIndex));
         updateFilter(data, map, attributes, filterAmount);
-        updateLegend(map, attributes[newIndex]);
     });
     //filter menu controller
     $('.menu-ui a').click(function() {
@@ -199,10 +196,6 @@ function addControlListeners(map, attributes, data) {
     $('.5k').click(function(){
         updateFilter(data, map, attributes, "type_5k")
     });
-    // //show all filter controller
-    // $('.all').click(function(){
-    //     updateFilter(data, map, attributes, 0)
-    // });
 };
 
 //deletes current map layer and replaces it with new layer with given filters
@@ -256,44 +249,17 @@ function createLegend(map, attributes){
        },
        onAdd: function(map){
            var container = L.DomUtil.create('div', 'legend-control-container');
-           $(container).append('<div id="temporal-legend">');
-           var svg = '<svg id="attribute-legend" width="180px" height="180px">';
-
-            //enable and disables map functions while using controls
-            container.addEventListener('mousedown', function() {
-                map.dragging.disable();
-            });
-            container.addEventListener('mouseup', function() {
-                map.dragging.enable();
-            });
-            container.addEventListener('mouseover', function() {
-                map.doubleClickZoom.disable();
-            });
-            container.addEventListener('mouseout', function(){
-                map.doubleClickZoom.enable();
-            });
+           $(container).append('<div class="marathonDude"><div>Marathon </div><img class="pic" src="img/runningmanblue.png"></div>');
+           $(container).append('<div class="halfDude"><div>Half Marathon </div><img class="pic" src="img/runningmangreen.png"></div>');
+           $(container).append('<div class="relayDude"><div>Relay </div><img class="pic" src="img/runningmanpurple.png"></div>');
+           $(container).append('<div class="tenkDude"><div>10k </div><img class="pic" src="img/runningmanyellow.png"></div>');
+           $(container).append('<div class="fivekDude"><div>5k </div><img class="pic" src="img/runningmanred.png"></div>');
            return container;
        } 
     });
     map.addControl(new LegendControl());
-    updateLegend(map, attributes[0]);
 };
 
-//update legend as attribute changes
- function updateLegend(map, attributes){
-     var month = attributes;
-     var content = "Race Types";
-    //  var content = "Number of Races " + month;
-     $('#temporal-legend').html(content);
-    //  var circleValues = getCircleValues(map, attributes);
-    //  for (var key in circleValues){
-    //      var radius = calcPropRadius(circleValues[key]);
-    //      $('#'+key).attr({
-    //          cy: 105 - radius,
-    //          r: radius
-    //      });
-    //  };
- };
 
 function updatePopup(map, attribute) {
     map.eachLayer(function(layer){
@@ -320,13 +286,9 @@ function getData(map){
         dataType: "json",
         success: function(response){
             var attributes = processData(response);
-            mapLayer = L.geoJson(response, {
-                pointToLayer: function(feature, latlng){
-                    return pointToLayer(feature, latlng, attributes, 'type_mara');           
-                }
-            }).addTo(map);
+            mapLayer == symbols(response, map, attributes, 0, "type_mara");
             createSequenceControls(map, attributes);
-//            createLegend(map, attributes);
+            createLegend(map, attributes);
             createFilterControls(map, attributes);
             addControlListeners(map, attributes, response);
             var scale = L.control.scale().addTo(map);

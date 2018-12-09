@@ -15,7 +15,7 @@ body{
 }
 
 #instructions {
-    height: 10%;
+    height: 13%;
     width: 40%;
     margin: 0px auto;
     position: bottom;
@@ -24,6 +24,7 @@ body{
     display: inline-block;
     background-color: white;
     position: left;
+    overflow-wrap: break-word;
 }
 
 #outerdiv {
@@ -49,8 +50,6 @@ header {
 
 h1 {
     height: 20px;
-/*    font-family: 'Poiret One', cursive;*/
-/*    font-family: 'Ubuntu', sans-serif;*/
     font-family: 'Bangers', cursive;
     font-style: normal;
     font-size:40px;
@@ -67,7 +66,6 @@ h2 {
     font-size: 15px;
     font-weight: bold;
     color:darkred;
-    /* border-bottom: 2px solid black;   */
 }
 
 h3 {
@@ -76,7 +74,7 @@ h3 {
     font-size: 15px;
     color: #404040;
     font-weight: bold;
-    text-align: center;
+    text-align: left;
 }
 
  .range-slider {
@@ -146,14 +144,48 @@ h3 {
     font-weight: bold;
     background-color: rgba(255,255,255,0.8);
     padding: 10px;
-    text-align: left;
-    border: solid gray 2.5px;
-}
-
-#temporal-legend{
     text-align: center;
+    border: solid gray 2.5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: flex-start;
 }
 
+.pic{
+    height: 20px;
+    width: 20px;
+}
+.marathonDude {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    order: 1;
+}
+.halfDude{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    order: 2; 
+}
+.relayDude{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    order: 3; 
+}
+.tenkDude{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    order: 4; 
+}
+.fivekDude{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    order: 5; 
+}
 .menu-ui {
     background:#fff;
     position:absolute;
