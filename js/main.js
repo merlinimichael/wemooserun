@@ -17,14 +17,15 @@ getData(map);
 
 };
 
-function symbols(data, map, attributes, index, filterCount){
+function symbols(data, map, attributes, index, filterAmount){
     return L.geoJSON(data, {
         pointToLayer: function(feature, latlng){
             return pointToLayer(feature, latlng, attributes, index);
         },
-        // filter: function(feature, latlng){
-        //     return feature.properties[attributes[0]] > filterCount;
-        // }
+        filter: function(feature, latlng){
+            return feature.properties[filterAmount] === "x"
+            // return feature.properties[attributes[index]] > filterAmount;
+        }
     }).addTo(map);
 };
 
@@ -66,8 +67,7 @@ function createFilterControls(map, attributes){
         },
         onAdd: function(map){
             var container = L.DomUtil.create('div', 'filter-control-container');
-            $(container).append('<nav class="menu-ui"><a href="#" class="active all" \
-            data-filter="all">Show all</a><a href="#" data-filter="marathon" class="marathon">Marathon - 26.2 miles</a><a href="#" data-filer="halfmarathon" class="halfmarathon">Half Marathon - 13.1 miles</a><a \
+            $(container).append('<nav class="menu-ui"><a href="#" data-filter="marathon" class="active marathon">Marathon - 26.2 miles</a><a href="#" data-filer="halfmarathon" class="halfmarathon">Half Marathon - 13.1 miles</a><a \
             href="#" data-filter="marathonrelay" class="marathonrelay">Marathon Relay</a><a href="#" data-filter="10k" class="10k">10k - 6.2 miles</a><a href="#" data-filter="5k" class="5k">5k - 3.1 miles</a></nav>');
             //enable and disables map functions while using controls
             container.addEventListener('mousedown', function() {
@@ -130,7 +130,7 @@ function addControlListeners(map, attributes, data) {
         var index = $(this).val();
         var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#currentMonthText').text(getCurrentMonth(index));
-        // updatePopup(map, getCurrentMonth(index));
+        updatePopup(map, getCurrentMonth(index));
         updateFilter(data, map, attributes, filterAmount);
         updateLegend(map, attributes[index]);
     });
@@ -140,7 +140,7 @@ function addControlListeners(map, attributes, data) {
         var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#month-slider').val(newIndex).slider;
         $('#currentMonthText').text(getCurrentMonth(newIndex));
-        // updatePopup(map, getCurrentMonth(newIndex));
+        updatePopup(map, getCurrentMonth(newIndex));
         updateFilter(data, map, attributes, filterAmount);
         updateLegend(map, attributes[newIndex]);
     });
@@ -150,7 +150,7 @@ function addControlListeners(map, attributes, data) {
         var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#month-slider').val(newIndex).slider;
         $('#currentMonthText').text(getCurrentMonth(newIndex));
-        // updatePopup(map, getCurrentMonth(newIndex));
+        updatePopup(map, getCurrentMonth(newIndex));
         updateFilter(data, map, attributes, filterAmount);
         updateLegend(map, attributes[newIndex]);
     });
@@ -159,21 +159,28 @@ function addControlListeners(map, attributes, data) {
         $(this).addClass('active').siblings().removeClass('active');
     });
     //greater than five filter controller
-    $('.gt5').click(function(){
-        updateFilter(data, map, attributes, 5)
+    $('.marathon').click(function(){
+        updateFilter(data, map, attributes, "type_mara")
+        console.log("pizza");
     });
     //greater than 10 filter controller
-    $('.gt10').click(function(){
-        updateFilter(data, map, attributes, 10)
+    $('.halfmarathon').click(function(){
+        updateFilter(data, map, attributes, "type_half")
     });
     //greater than 20 filter controller
-    $('.gt20').click(function(){
-        updateFilter(data, map, attributes, 20)
+    $('.marathonrelay').click(function(){
+        updateFilter(data, map, attributes, "type_relay")
     });
-    //show all filter controller
-    $('.all').click(function(){
-        updateFilter(data, map, attributes, 0)
+    $('.10k').click(function(){
+        updateFilter(data, map, attributes, "type_10k")
     });
+    $('.5k').click(function(){
+        updateFilter(data, map, attributes, "type_5k")
+    });
+    // //show all filter controller
+    // $('.all').click(function(){
+    //     updateFilter(data, map, attributes, 0)
+    // });
 };
 
 //deletes current map layer and replaces it with new layer with given filters
@@ -186,11 +193,15 @@ function updateFilter(data, map, attributes, filterAmount){
 //takes filter button text and returns filter amount
 function getRunFilter(buttonText){
     if (buttonText === "Marathon - 26.2 miles"){
-        return 5;
+        return "type_mara";
     } else if (buttonText === "Half Marathon - 13.1 miles"){
-        return 10;
+        return "type_half";
     } else if (buttonText === "Marathon Relay"){
-        return 20;
+        return "type_relay";
+    } else if (buttonText === "10k - 6.2 miles"){
+        return "type_10k";
+    } else if (buttonText === "5k - 3.1 miles"){
+        return "type_5k";
     } else {
         return 0;
     };
@@ -225,13 +236,7 @@ function createLegend(map, attributes){
            var container = L.DomUtil.create('div', 'legend-control-container');
            $(container).append('<div id="temporal-legend">');
            var svg = '<svg id="attribute-legend" width="180px" height="180px">';
-        //    var circles = ["max", "mean", "min"];
-           //CREATES THE SVG FOR THE "DOTS"
-        //    for (var i=0; i<circles.length; i++){
-        //        svg += '<circle class="legend-circle" id="' + circles[i] + '" fill="#ffffb3" fill-opacity="0.8" stroke="#000000" cx="75"/>';
-        //    };
-        //    svg += "</svg>";
-        //    $(container).append(svg);
+
             //enable and disables map functions while using controls
             container.addEventListener('mousedown', function() {
                 map.dragging.disable();
@@ -295,8 +300,6 @@ function updatePopup(map, attribute) {
     map.eachLayer(function(layer){
         if (layer.feature && layer.feature.properties[attribute]){
             var props = layer.feature.properties;
-            // var radius = calcPropRadius(props[attributes]);
-            // layer.setRadius(radius);
             var popupContent = "<p><b>" + layer.feature.properties.city + ': </b>' + '\xa0' + layer.feature.properties[attribute] + '\xa0' + "clear days </p>";
             layer.bindPopup(popupContent,{
                 offset: new L.Point(0)        
@@ -308,34 +311,6 @@ function updatePopup(map, attribute) {
 //process the incoming data: I think we want to make a list of attribute names
 function processData(data){
     var attributes = ["date","type_mara","type_half","type_relay","type_10k","type_5k"];
-    console.log(attributes);
-    // var properties = data.features[0].properties;
-    // var monthArray = [
-    //     "January",
-    //     "February",
-    //     "March",
-    //     "April",
-    //     "May",
-    //     "June",
-    //     "July",
-    //     "August",
-    //     "September",
-    //     "October",
-    //     "November",
-    //     "December"
-    // ];
-    // for (var attribute in properties){
-    //     var found = false;
-    //     for (var month in monthArray){
-    //         if(attribute.indexOf(monthArray[month])>-1){
-    //             found = true;
-    //             break;
-    //         }
-    //     }
-    //     if (found){
-    //         attributes.push(attribute);
-    //     }
-    // };
     return attributes;
  };
 
