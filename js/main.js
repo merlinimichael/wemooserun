@@ -22,56 +22,40 @@ function symbols(data, map, attributes, index, filterCount){
         pointToLayer: function(feature, latlng){
             return pointToLayer(feature, latlng, attributes, index);
         },
-        filter: function(feature, latlng){
-            return feature.properties[attributes[0]] > filterCount;
-        }
+        // filter: function(feature, latlng){
+        //     return feature.properties[attributes[0]] > filterCount;
+        // }
     }).addTo(map);
 };
 
-// // calculate the radius of each proportional symbol
-// function calcPropRadius(attValue){
-//     var scaleFactor = 50;
-//     var area = Math.pow(attValue, 1.5) * scaleFactor;
-//     var radius = Math.sqrt(area/Math.PI);
-//     return radius;
-// };
-
-
 //create point to layer
 function pointToLayer(feature, latlng, attributes, index){
-    var monthAttribute = feature[attributes[0]];
-    var currentMonth = getCurrentMonth(index);
-    if (monthAttribute !== currentMonth){
-        return;
-    }
-
-    var options = {
-        fillColor: "#ffffb3",
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
+    if(feature.properties.date == getCurrentMonth(index)){
+        var layer = L.marker(latlng, {icon:L.icon({
+            iconUrl: "img/runningmanred.PNG",
+            iconSize: [40, 40],   
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -28]
+            })
+        });
+        //create popup content and bind it to the marker
+        var popupContent = "<p><b>" + feature.properties.racename + ': </b>' + '\xa0' + feature.properties[attributes] + '\xa0' + "</p>";
+        layer.bindPopup(popupContent,{
+            offset: new L.Point(0)
+        });
+        layer.on({
+            mouseover: function(){
+                this.openPopup();
+            },
+            mouseout: function(){
+                this.closePopup();
+            },
+            click: function(){
+                $('#panel').html(popupContent);
+            }
+        })
+        return layer;
     };
-    // var attValue = Number(feature.properties[attribute]);
-    // options.radius = calcPropRadius(attValue);
-    // // var layer = L.circleMarker(latlng, options);
-    //create popup content and bind it to the marker
-    var popupContent = "<p><b>" + feature.properties.racename + ': </b>' + '\xa0' + feature.properties[attribute] + '\xa0' + "</p>";
-    layer.bindPopup(popupContent,{
-        offset: new L.Point(0, -options.radius)
-    });
-    layer.on({
-        mouseover: function(){
-            this.openPopup();
-        },
-        mouseout: function(){
-            this.closePopup();
-        },
-        click: function(){
-            $('#panel').html(popupContent);
-        }
-    });
-    return layer;
 };
 
 //create filter control 
@@ -146,7 +130,7 @@ function addControlListeners(map, attributes, data) {
         var index = $(this).val();
         var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#currentMonthText').text(getCurrentMonth(index));
-        updatePropSymbols(map, getCurrentMonth(newIndex));
+        // updatePopup(map, getCurrentMonth(index));
         updateFilter(data, map, attributes, filterAmount);
         updateLegend(map, attributes[index]);
     });
@@ -156,7 +140,7 @@ function addControlListeners(map, attributes, data) {
         var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#month-slider').val(newIndex).slider;
         $('#currentMonthText').text(getCurrentMonth(newIndex));
-        updatePropSymbols(map, getCurrentMonth(newIndex));
+        // updatePopup(map, getCurrentMonth(newIndex));
         updateFilter(data, map, attributes, filterAmount);
         updateLegend(map, attributes[newIndex]);
     });
@@ -166,7 +150,7 @@ function addControlListeners(map, attributes, data) {
         var filterAmount = getRunFilter(document.getElementsByClassName('active')[0].innerText);
         $('#month-slider').val(newIndex).slider;
         $('#currentMonthText').text(getCurrentMonth(newIndex));
-        updatePropSymbols(map, getCurrentMonth(newIndex));
+        // updatePopup(map, getCurrentMonth(newIndex));
         updateFilter(data, map, attributes, filterAmount);
         updateLegend(map, attributes[newIndex]);
     });
@@ -216,7 +200,7 @@ function getRunFilter(buttonText){
 function getCurrentMonth (index) {
     var monthArray = [
         "January",
-        "Feburary",
+        "February",
         "March",
         "April",
         "May",
@@ -307,7 +291,7 @@ function createLegend(map, attributes){
 //     };
 //  };
 
-function updatePropSymbols(map, attribute) {
+function updatePopup(map, attribute) {
     map.eachLayer(function(layer){
         if (layer.feature && layer.feature.properties[attribute]){
             var props = layer.feature.properties;
@@ -362,55 +346,14 @@ function getData(map){
     $.ajax("data/marathonruns.geojson", {
         dataType: "json",
         success: function(response){
-            searchLayer = L.geoJson(response, {
+            var attributes = processData(response);
+            mapLayer = L.geoJson(response, {
                 pointToLayer: function(feature, latlng){
-                    if(feature.properties.type_mara == 'x')
-                        return L.marker(latlng, {icon:L.icon({
-                                iconUrl: "img/runningmanblue.PNG",
-                                iconSize: [40, 40],   
-                                iconAnchor: [20, 40],
-                                popupAnchor: [0, -28]
-                                })
-                        });
-                    if(feature.properties.type_half == 'x')
-                        return L.marker(latlng, {icon:L.icon({
-                                iconUrl: "img/runningmanred.PNG",
-                                iconSize: [40, 40],   
-                                iconAnchor: [20, 40],
-                                popupAnchor: [0, -28]
-                                })
-                        });
-                    if(feature.properties.type_relay == 'x')
-                        return L.marker(latlng, {icon:L.icon({
-                                iconUrl: "img/runningmanpurple.PNG",
-                                iconSize: [40, 40],   
-                                iconAnchor: [20, 40],
-                                popupAnchor: [0, -28]
-                                })
-                        });
-                    if(feature.properties.type_10k == 'x')
-                        return L.marker(latlng, {icon:L.icon({
-                                iconUrl: "img/runningmangreen.PNG",
-                                iconSize: [40, 40],   
-                                iconAnchor: [20, 40],
-                                popupAnchor: [0, -28]
-                                })
-                        });
-                    if(feature.properties.type_5k == 'x')
-                        return L.marker(latlng, {icon:L.icon({
-                                iconUrl: "img/runningmanyellow.PNG",
-                                iconSize: [40, 40],   
-                                iconAnchor: [20, 40],
-                                popupAnchor: [0, -28]
-                                })
-                        });
+                    return pointToLayer(feature, latlng, attributes, 0);           
                 }
             }).addTo(map);
-            
-            
-            
-            var attributes = processData(response);
-            mapLayer = symbols(response, map, attributes, 0, 0);
+
+            // mapLayer = symbols(response, map, attributes, 0, 0);
             createSequenceControls(map, attributes);
 //            createLegend(map, attributes);
             createFilterControls(map, attributes);
