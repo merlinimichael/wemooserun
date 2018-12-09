@@ -14,8 +14,19 @@ body {
     display: inline-block;
 }
 
+#instructions {
+    height: 10%;
+    width: 40%;
+    margin: 0px auto;
+    position: bottom;
+    padding: 5px;
+    border: 2px solid black;
+    display: inline-block;
+    background-color: white;
+    position: left;
+}
+
 #outerdiv {
-   
     background-image: url(/img/landscape.jpg);
     height: 100%;
     width: 95%;
@@ -46,11 +57,20 @@ h1 {
 
 h2 {
     font-family:'cursive', cursive;
-    font-style:italic;
-    font-size:15px;
+    font-style: italic;
+    font-size: 15px;
     font-weight: bold;
     color:darkred
     
+}
+
+h3 {
+    font-family: 'cabinregular', serif;
+    font-style: normal;
+    font-size: 15px;
+    color: #404040;
+    font-weight: bold;
+    text-align: center;
 }
 
  .range-slider {
