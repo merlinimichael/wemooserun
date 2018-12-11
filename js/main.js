@@ -39,13 +39,13 @@ function pointToLayer(feature, latlng, attributes, index, filterAmount){
         picture = "img/runningmanblue.PNG"
     }
     else if(filterAmount == "type_half"){
-        picture = "img/runningmanred.PNG"
+        picture = "img/runningmangreen.PNG"
     }
     else if(filterAmount == "type_relay"){
         picture = "img/runningmanpurple.PNG"
     }
     else if (filterAmount =="type_10k"){
-        picture = "img/runningmanyellow.PNG"
+        picture = "img/runningmanorange.PNG"
     }
     else if (filterAmount == "type_5k"){
         picture = "img/runningmanred.PNG"
@@ -62,15 +62,12 @@ function pointToLayer(feature, latlng, attributes, index, filterAmount){
             })
         });
         //create popup content and bind it to the marker
-        var popupContent = "<p><b>" + feature.properties.city + "," + '\xa0' + feature.properties.state + ': </b>' + '\xa0' + feature.properties.racename + '\xa0' + "</p>" + "<p><b>"
-            + "Race URL" + ': </b>' + feature.properties.url + "</p>";
+        var popupContent = ("<a href='" + feature.properties.url + "'>" + feature.properties.racename + "</a>" + "<p><b>" + feature.properties.city + "," + '\xa0' + feature.properties.state + ' </b>')
+            
         layer.bindPopup(popupContent);
         layer.on({
             mouseover: function(){
                 this.openPopup();
-            },
-            mouseout: function(){
-                this.closePopup();
             },
             click: function(){
                 $('#panel').html(popupContent);
@@ -251,7 +248,7 @@ function createLegend(map, attributes){
            $(container).append('<div class="marathonDude"><div>Marathon </div><img class="pic" src="img/runningmanblue.png"></div>');
            $(container).append('<div class="halfDude"><div>Half Marathon </div><img class="pic" src="img/runningmangreen.png"></div>');
            $(container).append('<div class="relayDude"><div>Relay </div><img class="pic" src="img/runningmanpurple.png"></div>');
-           $(container).append('<div class="tenkDude"><div>10k </div><img class="pic" src="img/runningmanyellow.png"></div>');
+           $(container).append('<div class="tenkDude"><div>10k </div><img class="pic" src="img/runningmanorange.png"></div>');
            $(container).append('<div class="fivekDude"><div>5k </div><img class="pic" src="img/runningmanred.png"></div>');
            return container;
        } 
