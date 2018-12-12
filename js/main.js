@@ -62,8 +62,9 @@ function pointToLayer(feature, latlng, attributes, index, filterAmount){
             })
         });
         //create popup content and bind it to the marker
-        var popupContent = ("<a href='" + feature.properties.url + "'>" + feature.properties.racename + "</a>" + "<p><b>" + feature.properties.city + "," + '\xa0' + feature.properties.state + ' </b>')
+        var popupContent = ("<a href='" + feature.properties.url + "'>" + feature.properties.racename + "</a>" + "<p><b>" + feature.properties.city + "," + '\xa0' + feature.properties.state + ' </b>');
             
+
         layer.bindPopup(popupContent);
         layer.on({
             mouseover: function(){
